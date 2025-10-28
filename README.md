@@ -7,16 +7,59 @@ Open source starter for building AI-powered apps with OpenAI API in Python.
 - OpenAI GPT (or other) LLMs
 - Python sample code for sending prompts to OpenAI
 - **Web API** using FastAPI for programmatic access
-- **API Key authentication** (set via environment variable)
+- **Dynamic API Key authentication** (users generate their own keys)
 - Docker support
 - MIT licensed
+
+## API Key Generation & Usage
+
+To use this API, you need an API key. You can generate your own key and use it to authenticate your requests.
+
+### 1. Generate an API Key
+
+**Endpoint:**  
+`POST /v1/auth/key`
+
+**Request Example:**
+```bash
+curl -X POST http://localhost:8000/v1/auth/key
+```
+**Response:**
+```json
+{
+  "api_key": "your-generated-api-key"
+}
+```
+
+### 2. Authenticate Your Requests
+
+Include your API key in the `Authorization` header using the `Bearer` scheme:
+
+```bash
+curl -H "Authorization: Bearer your-generated-api-key" \
+     -X POST http://localhost:8000/v1/chat/completions \
+     -d '{ "model": "gpt-3.5-turbo", "messages": [ ... ] }'
+```
+
+All major endpoints require a valid API key.
+
+### 3. Example: Using with n8n
+
+- Use the n8n HTTP Request node.
+- Set the Authorization header as shown above.
+- Use the appropriate endpoint (e.g., `/v1/chat/completions`) and match OpenAI’s payload format.
+
+### 4. Available Endpoints
+
+- `/v1/auth/key` — Generate a new API key
+- `/v1/chat/completions` — Chat endpoint (OpenAI-compatible)
+- ... (add more as needed)
 
 ## Quick Start
 
 ### Prerequisites
 
 - Python 3.8+
-- [OpenAI account & API key](https://platform.openai.com/account/api-keys)
 - (Optional) Docker installed
 
 ### Run Locally
@@ -28,7 +71,7 @@ Open source starter for building AI-powered apps with OpenAI API in Python.
     cd Ollama-MrJel
     ```
 
-2. Copy `.env.example` to `.env` and add your OpenAI API key:
+2. (Optional) Copy `.env.example` to `.env` if using OpenAI backend:
 
     ```sh
     cp .env.example .env
@@ -44,16 +87,12 @@ Open source starter for building AI-powered apps with OpenAI API in Python.
 4. Run the API server:
 
     ```sh
-    uvicorn api:app --reload
+    uvicorn main:app --reload
     ```
 
-5. All requests must include your API key (default: `mrjel-secret`):
+5. Generate your API key and use it for all requests (see above).
 
-    ```
-    X-API-Key: mrjel-secret
-    ```
-
-6. Visit [http://localhost:8000/docs](http://localhost:8000/docs) and "Authorize" with the API key to try out the endpoints.
+6. Visit [http://localhost:8000/docs](http://localhost:8000/docs) and "Authorize" with your API key to try out the endpoints.
 
 ### Run with Docker
 
@@ -61,20 +100,15 @@ Open source starter for building AI-powered apps with OpenAI API in Python.
 
     ```sh
     docker build -t mrjel-openai .
-    docker run --env OPENAI_API_KEY=sk-xxx --env API_KEY=your-secret-key -p 8000:8000 mrjel-openai
+    docker run --env OPENAI_API_KEY=sk-xxx -p 8000:8000 mrjel-openai
     ```
 
 2. The API will be at [http://localhost:8000/docs](http://localhost:8000/docs).
 
-## Environment Variables
-
-- `OPENAI_API_KEY`: Your OpenAI API key.
-- `API_KEY`: Key required in `X-API-Key` header for all API requests (default: `mrjel-secret`).
-
 ## Project Structure
 
-- `api.py` — FastAPI web API for OpenAI prompts
-- `main.py` — CLI sample for direct OpenAI prompt
+- `api.py` — FastAPI web API for OpenAI prompts and key management
+- `main.py` — CLI sample or FastAPI app entrypoint
 - `requirements.txt` — Python dependencies
 - `Dockerfile` — Container setup
 - `.env.example` — Example environment file
@@ -82,15 +116,15 @@ Open source starter for building AI-powered apps with OpenAI API in Python.
 
 ## API Usage
 
-- **POST /generate**
-    - Header: `X-API-Key: mrjel-secret`
+- **POST /v1/chat/completions**
+    - Header: `Authorization: Bearer <your-generated-api-key>`
     - Request JSON:  
       ```json
-      { "prompt": "Hello, world!", "model": "gpt-3.5-turbo" }
+      { "model": "gpt-3.5-turbo", "messages": [ ... ] }
       ```
     - Response JSON:  
       ```json
-      { "response": "OpenAI's answer..." }
+      { "message": "Your chat completion logic here." }
       ```
 - Try it live at `/docs` after you start the API!
 
