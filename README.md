@@ -1,11 +1,11 @@
-# Ollama-MrJel
+# Jelvan Ai
 
-Open source starter for building AI-powered apps with OpenAI API in Python.
+Open source starter for building AI-powered apps with Jelvan Ai API in Python.
 
 ## Features
 
-- OpenAI GPT (or other) LLMs
-- Python sample code for sending prompts to OpenAI
+- Jelvan Ai LLMs (or other custom models)
+- Python sample code for sending prompts to Jelvan Ai
 - **Web API** using FastAPI for programmatic access
 - **Dynamic API Key authentication** (users generate their own keys)
 - Docker support
@@ -38,7 +38,7 @@ Include your API key in the `Authorization` header using the `Bearer` scheme:
 ```bash
 curl -H "Authorization: Bearer your-generated-api-key" \
      -X POST http://localhost:8000/v1/chat/completions \
-     -d '{ "model": "gpt-3.5-turbo", "messages": [ ... ] }'
+     -d '{ "model": "jelvan-ai-model", "messages": [ ... ] }'
 ```
 
 All major endpoints require a valid API key.
@@ -47,12 +47,12 @@ All major endpoints require a valid API key.
 
 - Use the n8n HTTP Request node.
 - Set the Authorization header as shown above.
-- Use the appropriate endpoint (e.g., `/v1/chat/completions`) and match OpenAI’s payload format.
+- Use the appropriate endpoint (e.g., `/v1/chat/completions`) and match Jelvan Ai’s payload format.
 
 ### 4. Available Endpoints
 
 - `/v1/auth/key` — Generate a new API key
-- `/v1/chat/completions` — Chat endpoint (OpenAI-compatible)
+- `/v1/chat/completions` — Chat endpoint (Jelvan Ai-compatible)
 - ... (add more as needed)
 
 ## Quick Start
@@ -71,11 +71,11 @@ All major endpoints require a valid API key.
     cd Ollama-MrJel
     ```
 
-2. (Optional) Copy `.env.example` to `.env` if using OpenAI backend:
+2. (Optional) Copy `.env.example` to `.env` if using a backend that requires it:
 
     ```sh
     cp .env.example .env
-    # Edit .env to set your OPENAI_API_KEY
+    # Edit .env to set your JELVAN_AI_API_KEY if required
     ```
 
 3. Install Python dependencies:
@@ -99,15 +99,15 @@ All major endpoints require a valid API key.
 1. Build and start the container:
 
     ```sh
-    docker build -t mrjel-openai .
-    docker run --env OPENAI_API_KEY=sk-xxx -p 8000:8000 mrjel-openai
+    docker build -t jelvan-ai .
+    docker run -p 8000:8000 jelvan-ai
     ```
 
 2. The API will be at [http://localhost:8000/docs](http://localhost:8000/docs).
 
 ## Project Structure
 
-- `api.py` — FastAPI web API for OpenAI prompts and key management
+- `api.py` — FastAPI web API for Jelvan Ai prompts and key management
 - `main.py` — CLI sample or FastAPI app entrypoint
 - `requirements.txt` — Python dependencies
 - `Dockerfile` — Container setup
@@ -120,7 +120,7 @@ All major endpoints require a valid API key.
     - Header: `Authorization: Bearer <your-generated-api-key>`
     - Request JSON:  
       ```json
-      { "model": "gpt-3.5-turbo", "messages": [ ... ] }
+      { "model": "jelvan-ai-model", "messages": [ ... ] }
       ```
     - Response JSON:  
       ```json
