@@ -1,53 +1,44 @@
 import os
-from fastapi import FastAPI, HTTPException, Header, Depends
-from fastapi.security.api_key import APIKeyHeader
-from pydantic import BaseModel
-import openai
-from dotenv import load_dotenv
+import json
+import secrets
+from fastapi import APIRouter, Request, HTTPException, status, Depends
 
-load_dotenv()
+router = APIRouter()
 
-app = FastAPI(
-    title="MrJel OpenAI API",
-    description="API for OpenAI inference with API key authentication",
-    version="1.0.0"
-)
+API_KEYS_FILE = "api_keys.json"
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DEFAULT_MODEL = "gpt-3.5-turbo"
-API_KEY = os.getenv("API_KEY", "mrjel-secret")
-API_KEY_NAME = "X-API-Key"
+def load_api_keys():
+    if not os.path.exists(API_KEYS_FILE):
+        return []
+    with open(API_KEYS_FILE, "r") as f:
+        return json.load(f)
 
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY not set in environment or .env file.")
+def save_api_keys(keys):
+    with open(API_KEYS_FILE, "w") as f:
+        json.dump(keys, f)
 
-openai.api_key = OPENAI_API_KEY
+def create_api_key():
+    key = secrets.token_urlsafe(32)
+    keys = load_api_keys()
+    keys.append(key)
+    save_api_keys(keys)
+    return key
 
-class PromptRequest(BaseModel):
-    prompt: str
-    model: str = DEFAULT_MODEL
+def validate_api_key(request: Request):
+    auth = request.headers.get("Authorization")
+    if not auth or not auth.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing or invalid authorization header")
+    key = auth.replace("Bearer ", "")
+    if key not in load_api_keys():
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid API key")
+    return True
 
-class PromptResponse(BaseModel):
-    response: str
+@router.post("/v1/auth/key")
+def generate_key():
+    key = create_api_key()
+    return {"api_key": key}
 
-api_key_header = APIKeyHeader(name=API_KEY_NAME, auto_error=False)
-
-def get_api_key(api_key: str = Depends(api_key_header)):
-    if api_key != API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid or missing API Key")
-    return api_key
-
-def prompt_openai(prompt: str, model: str = DEFAULT_MODEL) -> str:
-    try:
-        completion = openai.ChatCompletion.create(
-            model=model,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return completion.choices[0].message.content.strip()
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"OpenAI error: {e}")
-
-@app.post("/generate", response_model=PromptResponse, dependencies=[Depends(get_api_key)])
-def generate(req: PromptRequest):
-    result = prompt_openai(req.prompt, req.model)
-    return PromptResponse(response=result)
+@router.post("/v1/chat/completions")
+def chat_completion(request: Request, valid: bool = Depends(validate_api_key)):
+    # Existing logic here, now protected by API key
+    return {"message": "Your chat completion logic here."}
