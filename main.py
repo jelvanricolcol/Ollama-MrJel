@@ -1,25 +1,12 @@
-import os
-import openai
-from dotenv import load_dotenv
-
-load_dotenv()
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-MODEL_NAME = "gpt-3.5-turbo"  # You can change to gpt-4, etc.
-
-if not OPENAI_API_KEY:
-    raise RuntimeError("OPENAI_API_KEY not set in environment or .env file.")
-
-openai.api_key = OPENAI_API_KEY
-
-def prompt_openai(prompt, model=MODEL_NAME):
-    completion = openai.ChatCompletion.create(
-        model=model,
-        messages=[{"role": "user", "content": prompt}]
-    )
-    return completion.choices[0].message.content.strip()
+def prompt_jelvan_ai(prompt, model="jelvan-ai-model"):
+    # Example: Replace this with your API call to Jelvan Ai backend if needed
+    print(f"[Jelvan Ai] Sending prompt to model '{model}':")
+    print(prompt)
+    # Fake response for CLI demo
+    return "Jelvan Ai says: This is a sample response."
 
 if __name__ == "__main__":
-    user_prompt = input("Enter your prompt: ")
-    print("Sending to OpenAI...")
-    response = prompt_openai(user_prompt)
-    print("OpenAI says:", response)
+    user_prompt = input("Enter your prompt for Jelvan Ai: ")
+    print("Sending to Jelvan Ai...")
+    response = prompt_jelvan_ai(user_prompt)
+    print(response)
