@@ -1,0 +1,2 @@
+# Ollama-MrJel
+OpenAi
